@@ -8,6 +8,10 @@ import PlaceholderPage from '../components/PlaceholderPage';
 // Pages
 import Login from '../pages/auth/Login';
 import StudentDashboard from '../pages/student/Dashboard';
+import StudentAttendance from '../pages/student/Attendance';
+import StudentTimetable from '../pages/student/Timetable';
+import StudentAssignments from '../pages/student/Assignments';
+import StudentNotices from '../pages/student/Notices';
 import FacultyDashboard from '../pages/faculty/Dashboard';
 import AdminDashboard from '../pages/admin/Dashboard';
 
@@ -76,10 +80,10 @@ export default function AppRoutes() {
       <Route element={<ProtectedRoute allowedRoles={['STUDENT']} />}>
         <Route element={<Layout />}>
           <Route path="/student" element={<StudentDashboard />} />
-          <Route path="/student/attendance" element={<PlaceholderPage title="My Attendance Records" />} />
-          <Route path="/student/timetable" element={<PlaceholderPage title="Section A Timetable" />} />
-          <Route path="/student/assignments" element={<PlaceholderPage title="My Coursework & Assignments" />} />
-          <Route path="/student/notices" element={<PlaceholderPage title="Student Notices & Circulars" />} />
+          <Route path="/student/attendance" element={<StudentAttendance />} />
+          <Route path="/student/timetable" element={<StudentTimetable />} />
+          <Route path="/student/assignments" element={<StudentAssignments />} />
+          <Route path="/student/notices" element={<StudentNotices />} />
           <Route path="/student/copilot" element={<PlaceholderPage title="AI University Copilot Assistant" />} />
         </Route>
       </Route>

@@ -7,7 +7,8 @@ import {
   BookOpen,
   AlertCircle,
   Sparkles,
-  ArrowRight
+  ArrowRight,
+  Loader2
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -20,14 +21,36 @@ export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value);
+    if (errorMessage) {
+      setErrorMessage(null);
+    }
+  };
+
+  const handlePasswordChange = (e) => {
+    setPassword(e.target.value);
+    if (errorMessage) {
+      setErrorMessage(null);
+    }
+  };
+
   const handleLoginSubmit = async (e) => {
     if (e) e.preventDefault();
+    if (isSubmitting) return;
+
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail || !password) {
+      setErrorMessage('Invalid email or password');
+      return;
+    }
+
     setErrorMessage(null);
     setIsSubmitting(true);
 
     try {
-      const loggedUser = await login(email, password);
-      // Role-based redirection after login
+      const loggedUser = await login(trimmedEmail, password);
+      // Role-based redirection after successful login
       if (loggedUser.role === 'STUDENT') {
         navigate('/student', { replace: true });
       } else if (loggedUser.role === 'FACULTY') {
@@ -38,30 +61,36 @@ export default function Login() {
         navigate('/', { replace: true });
       }
     } catch (err) {
-      setErrorMessage(err.message || 'Login failed. Please verify your credentials.');
+      setErrorMessage(err.message || 'Invalid email or password');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleSelectDemoAccount = (demoEmail, demoPassword = 'demo123') => {
+  const handleSelectDemoAccount = async (demoEmail, demoPassword = 'demo123') => {
+    if (isSubmitting) return;
+
     setEmail(demoEmail);
     setPassword(demoPassword);
     setErrorMessage(null);
-    // Instant submission for easy evaluator testing
     setIsSubmitting(true);
-    login(demoEmail, demoPassword)
-      .then((loggedUser) => {
-        if (loggedUser.role === 'STUDENT') navigate('/student', { replace: true });
-        else if (loggedUser.role === 'FACULTY') navigate('/faculty', { replace: true });
-        else if (loggedUser.role === 'ADMIN') navigate('/admin', { replace: true });
-      })
-      .catch((err) => {
-        setErrorMessage(err.message);
-      })
-      .finally(() => {
-        setIsSubmitting(false);
-      });
+
+    try {
+      const loggedUser = await login(demoEmail, demoPassword);
+      if (loggedUser.role === 'STUDENT') {
+        navigate('/student', { replace: true });
+      } else if (loggedUser.role === 'FACULTY') {
+        navigate('/faculty', { replace: true });
+      } else if (loggedUser.role === 'ADMIN') {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
+    } catch (err) {
+      setErrorMessage(err.message || 'Invalid email or password');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -88,23 +117,26 @@ export default function Login() {
           {/* Header */}
           <div className="mb-6 pb-4 border-b border-slate-100">
             <h2 className="text-lg font-bold text-slate-900">
-              Sign In to Your Account
+              Login to Your Account
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
               Enter your institutional credentials or use a 1-click demo role below.
             </p>
           </div>
 
-          {/* Error Message */}
+          {/* Error Message Alert */}
           {errorMessage && (
-            <div className="mb-5 p-3.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 flex items-start gap-2.5 text-xs">
+            <div
+              role="alert"
+              className="mb-5 p-3.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 flex items-start gap-2.5 text-xs animate-in fade-in duration-200"
+            >
               <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-              <span>{errorMessage}</span>
+              <span className="font-medium">{errorMessage}</span>
             </div>
           )}
 
           {/* Login Form */}
-          <form className="space-y-4" onSubmit={handleLoginSubmit}>
+          <form className="space-y-4" onSubmit={handleLoginSubmit} noValidate={false}>
             <div>
               <label
                 htmlFor="email"
@@ -114,12 +146,15 @@ export default function Login() {
               </label>
               <input
                 id="email"
+                name="email"
                 type="email"
                 required
+                autoComplete="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={handleEmailChange}
                 placeholder="name@demo.edu"
-                className="mt-1.5 block w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-blue-800 focus:bg-white transition"
+                disabled={isSubmitting}
+                className="mt-1.5 block w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-blue-800 focus:bg-white disabled:opacity-60 transition"
               />
             </div>
 
@@ -132,25 +167,31 @@ export default function Login() {
               </label>
               <input
                 id="password"
+                name="password"
                 type="password"
                 required
+                autoComplete="current-password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={handlePasswordChange}
                 placeholder="••••••••"
-                className="mt-1.5 block w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-blue-800 focus:bg-white transition"
+                disabled={isSubmitting}
+                className="mt-1.5 block w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-blue-800 focus:bg-white disabled:opacity-60 transition"
               />
             </div>
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg shadow-sm text-sm font-semibold text-white bg-blue-900 hover:bg-blue-800 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-blue-800 disabled:opacity-60 transition"
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg shadow-sm text-sm font-semibold text-white bg-blue-900 hover:bg-blue-800 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-blue-800 disabled:opacity-60 disabled:cursor-not-allowed transition"
             >
               {isSubmitting ? (
-                <span>Signing in...</span>
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Logging in...</span>
+                </>
               ) : (
                 <>
-                  <span>Sign In</span>
+                  <span>Login</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -173,7 +214,7 @@ export default function Login() {
                 type="button"
                 onClick={() => handleSelectDemoAccount('student1@demo.edu')}
                 disabled={isSubmitting}
-                className="w-full flex items-center justify-between p-2.5 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/60 text-left transition text-xs group"
+                className="w-full flex items-center justify-between p-2.5 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/60 text-left transition text-xs group disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <div className="flex items-center gap-2.5">
                   <div className="w-7 h-7 rounded-md bg-blue-100 text-blue-800 flex items-center justify-center font-bold">
@@ -198,7 +239,7 @@ export default function Login() {
                 type="button"
                 onClick={() => handleSelectDemoAccount('student2@demo.edu')}
                 disabled={isSubmitting}
-                className="w-full flex items-center justify-between p-2.5 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/60 text-left transition text-xs group"
+                className="w-full flex items-center justify-between p-2.5 rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/60 text-left transition text-xs group disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <div className="flex items-center gap-2.5">
                   <div className="w-7 h-7 rounded-md bg-blue-100 text-blue-800 flex items-center justify-center font-bold">
@@ -223,7 +264,7 @@ export default function Login() {
                 type="button"
                 onClick={() => handleSelectDemoAccount('faculty1@demo.edu')}
                 disabled={isSubmitting}
-                className="w-full flex items-center justify-between p-2.5 rounded-lg border border-slate-200 hover:border-purple-300 hover:bg-purple-50/60 text-left transition text-xs group"
+                className="w-full flex items-center justify-between p-2.5 rounded-lg border border-slate-200 hover:border-purple-300 hover:bg-purple-50/60 text-left transition text-xs group disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <div className="flex items-center gap-2.5">
                   <div className="w-7 h-7 rounded-md bg-purple-100 text-purple-800 flex items-center justify-center font-bold">
@@ -248,7 +289,7 @@ export default function Login() {
                 type="button"
                 onClick={() => handleSelectDemoAccount('admin@demo.edu')}
                 disabled={isSubmitting}
-                className="w-full flex items-center justify-between p-2.5 rounded-lg border border-slate-200 hover:border-slate-400 hover:bg-slate-50 text-left transition text-xs group"
+                className="w-full flex items-center justify-between p-2.5 rounded-lg border border-slate-200 hover:border-slate-400 hover:bg-slate-50 text-left transition text-xs group disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <div className="flex items-center gap-2.5">
                   <div className="w-7 h-7 rounded-md bg-slate-200 text-slate-800 flex items-center justify-center font-bold">

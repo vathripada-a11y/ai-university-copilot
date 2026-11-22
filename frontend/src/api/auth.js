@@ -5,11 +5,11 @@ const delay = (ms = 150) => new Promise((resolve) => setTimeout(resolve, ms));
 export const loginApi = async (email, password) => {
   await delay(200);
 
-  const normalizedEmail = email.trim().toLowerCase();
+  const normalizedEmail = (email || '').trim().toLowerCase();
   const user = USERS.find((u) => u.email.toLowerCase() === normalizedEmail);
 
   if (!user || user.password !== password) {
-    throw new Error('Invalid email or password. Please check your credentials.');
+    throw new Error('Invalid email or password');
   }
 
   // Clone user without password

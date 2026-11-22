@@ -3,6 +3,7 @@ import React from 'react';
 const BADGE_STYLES = {
   // Assignment / Workflow Statuses
   SUBMITTED: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  LATE: 'bg-orange-50 text-orange-700 border-orange-200',
   PENDING: 'bg-amber-50 text-amber-700 border-amber-200',
   OVERDUE: 'bg-rose-50 text-rose-700 border-rose-200',
 
@@ -16,6 +17,7 @@ const BADGE_STYLES = {
   HIGH: 'bg-rose-50 text-rose-700 border-rose-200',
   MEDIUM: 'bg-blue-50 text-blue-700 border-blue-200',
   LOW: 'bg-slate-100 text-slate-700 border-slate-200',
+  ALL: 'bg-slate-100 text-slate-700 border-slate-200',
 
   // Roles
   STUDENT: 'bg-blue-50 text-blue-800 border-blue-200',
