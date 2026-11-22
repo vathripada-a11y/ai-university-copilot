@@ -1,0 +1,5 @@
+-- =============================================================================
+-- AI University Copilot & Intelligent Campus Management Platform
+-- SDMIT Ujire, 5th Sem ISE Mini Project
+-- Database Schema Definition (MySQL 8)
+-- =============================================================================

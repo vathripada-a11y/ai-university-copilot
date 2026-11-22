@@ -1,0 +1,11 @@
+#!/bin/sh
+if [ -z "$JAVA_HOME" ]; then
+    if [ -d "/c/Program Files/Java/jdk-25" ]; then
+        export JAVA_HOME="/c/Program Files/Java/jdk-25"
+    fi
+fi
+if [ -f "/c/Program Files/JetBrains/IntelliJ IDEA 2026.3/plugins/maven-plugin/lib/maven3/bin/mvn" ]; then
+    exec "/c/Program Files/JetBrains/IntelliJ IDEA 2026.3/plugins/maven-plugin/lib/maven3/bin/mvn" "$@"
+else
+    exec mvn "$@"
+fi
