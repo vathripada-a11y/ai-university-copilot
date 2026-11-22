@@ -22,11 +22,19 @@ export default function Login() {
 
   const handleLoginSubmit = async (e) => {
     if (e) e.preventDefault();
+    if (isSubmitting) return;
+
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail || !password) {
+      setErrorMessage('Invalid email or password');
+      return;
+    }
+
     setErrorMessage(null);
     setIsSubmitting(true);
 
     try {
-      const loggedUser = await login(email, password);
+      const loggedUser = await login(trimmedEmail, password);
       // Role-based redirection after login
       if (loggedUser.role === 'STUDENT') {
         navigate('/student', { replace: true });
@@ -38,13 +46,14 @@ export default function Login() {
         navigate('/', { replace: true });
       }
     } catch (err) {
-      setErrorMessage(err.message || 'Login failed. Please verify your credentials.');
+      setErrorMessage('Invalid email or password');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleSelectDemoAccount = (demoEmail, demoPassword = 'demo123') => {
+    if (isSubmitting) return;
     setEmail(demoEmail);
     setPassword(demoPassword);
     setErrorMessage(null);
@@ -57,7 +66,7 @@ export default function Login() {
         else if (loggedUser.role === 'ADMIN') navigate('/admin', { replace: true });
       })
       .catch((err) => {
-        setErrorMessage(err.message);
+        setErrorMessage('Invalid email or password');
       })
       .finally(() => {
         setIsSubmitting(false);
@@ -117,7 +126,10 @@ export default function Login() {
                 type="email"
                 required
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (errorMessage) setErrorMessage(null);
+                }}
                 placeholder="name@demo.edu"
                 className="mt-1.5 block w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-blue-800 focus:bg-white transition"
               />
@@ -135,7 +147,10 @@ export default function Login() {
                 type="password"
                 required
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (errorMessage) setErrorMessage(null);
+                }}
                 placeholder="••••••••"
                 className="mt-1.5 block w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-hidden focus:ring-2 focus:ring-blue-800 focus:bg-white transition"
               />

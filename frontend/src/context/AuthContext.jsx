@@ -23,15 +23,10 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    setLoading(true);
     setPermissionNotice(null);
-    try {
-      const authenticatedUser = await loginApi(email, password);
-      setUser(authenticatedUser);
-      return authenticatedUser;
-    } finally {
-      setLoading(false);
-    }
+    const authenticatedUser = await loginApi(email, password);
+    setUser(authenticatedUser);
+    return authenticatedUser;
   };
 
   const logout = async () => {
